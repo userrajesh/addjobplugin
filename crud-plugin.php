@@ -23,7 +23,7 @@ function my_crud_install()
         id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
         jobtitle VARCHAR(150) NOT NULL,
         lastdatetoapply DATE NOT NULL,
-        noofvacancy INT UNSIGNED NOT NULL,
+        noofvacancy varchar (10) NOT NULL,
         applylink VARCHAR(255) NOT NULL,
         officialNotification varchar(500) not null,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -79,10 +79,10 @@ function my_crud_admin_page()
         if (isset($_POST['add_entry']) && check_admin_referer('my_crud_nonce_action', 'my_crud_nonce')) {
             $jobtitle = sanitize_text_field($_POST['jobtitle']);
             $lastdatetoapply = date('Y-m-d', strtotime($_POST['lastdatetoapply']));
-            $noofvacancy = intval($_POST['noofvacancy']);
+            $noofvacancy = sanitize_text_field($_POST['noofvacancy']);
             $applylink = esc_url_raw($_POST['applylink']);
             $officialNotification = esc_url_raw($_POST['officialNotification']);
-            if (!empty($jobtitle) && !empty($lastdatetoapply) && $noofvacancy > 0 && !empty($applylink) && !empty($officialNotification)) {
+            if (!empty($jobtitle) && !empty($lastdatetoapply) && !empty($noofvacancy) && !empty($applylink) && !empty($officialNotification)) {
                 $wpdb->insert(
                     $table_name,
                     [
@@ -92,7 +92,7 @@ function my_crud_admin_page()
                         'applylink' => $applylink,
                         'officialNotification' => $officialNotification
                     ],
-                    ['%s', '%s', '%d', '%s', '%s']
+                    ['%s', '%s', '%s', '%s', '%s']
                 );
 
                 echo "<div class='notice notice-success'><p>Entry added successfully!</p></div>";
@@ -115,7 +115,7 @@ function my_crud_admin_page()
         $id = intval($_POST['entry_id']);
         $jobtitle = sanitize_text_field($_POST['jobtitle']);
         $lastdatetoapply = sanitize_text_field($_POST['lastdatetoapply']);
-        $noofvacancy = intval($_POST['noofvacancy']);
+        $noofvacancy = sanitize_text_field($_POST['noofvacancy']);
         $applylink = esc_url_raw($_POST['applylink']);
         $officialNotification = esc_url_raw($_POST['officialNotification']);
         $updated = $wpdb->update(
@@ -128,7 +128,7 @@ function my_crud_admin_page()
                 'officialNotification' => $officialNotification
             ],
             ['id' => $id],
-            ['%s', '%s', '%d', '%s', '%s'],
+            ['%s', '%s', '%s', '%s', '%s'],
             ['%d']
         );
 
@@ -153,7 +153,7 @@ function my_crud_admin_page()
                 <tr>
                     <td><input type="text" name="jobtitle" placeholder="Job Title" required></td>
                     <td><input type="date" name="lastdatetoapply" required></td>
-                    <td><input type="number" name="noofvacancy" placeholder="No. of Vacancy" required></td>
+                    <td><input type="text" name="noofvacancy" placeholder="No. of Vacancy" required></td>
                     <td><input type="url" name="applylink" placeholder="Apply Link" required></td>
                     <td><input type="url" name="officialNotification" placeholder="Official Notification" required></td>
                     <td><input type="submit" name="add_entry" value="Add Entry"></td>
@@ -199,7 +199,7 @@ function my_crud_admin_page()
                                 <?php wp_nonce_field('update_entry_' . $entry->id); ?>
                                 <input type="hidden" name="entry_id" value="<?php echo $entry->id; ?>">
                                 <input type="text" name="jobtitle" value="<?php echo esc_attr($entry->jobtitle); ?>" required>
-                                <input type="number" name="noofvacancy" value="<?php echo esc_attr($entry->noofvacancy); ?>" required>
+                                <input type="text" name="noofvacancy" value="<?php echo esc_attr($entry->noofvacancy); ?>" required>
                                 <input type="date" name="lastdatetoapply" value="<?php echo esc_attr($entry->lastdatetoapply); ?>" required>
                                 <input type="url" name="applylink" value="<?php echo esc_attr($entry->applylink); ?>" required>
                                 <input type="url" name="officialNotification"  value="<?php echo esc_attr($entry->officialNotification);?>" required>
@@ -263,10 +263,10 @@ function view_all_jobs()
     <?php foreach ($entries as $entry) : ?>
         <tr>
             <td>
-                <?php 
+                <?php
                 echo esc_html($entry->jobtitle);
 
-                if (!empty($entry->created_at)) {
+                if (!empty($entry->created_at)) { 
                     $createdDate = new DateTime($entry->created_at);
                     $currentDate = new DateTime(); // Today's date
                     $interval = $createdDate->diff($currentDate);
@@ -307,6 +307,7 @@ function view_all_jobs()
             <script>
                 jQuery(document).ready(function($) {
                     $('#jobTable').DataTable();
+                    responsive:true;
                 });
             </script>
         <?php else : ?>
